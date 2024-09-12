@@ -8,21 +8,50 @@ on:
   workflow_dispatch:
 
 jobs:
+  setup-azure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Register Microsoft.Compute provider
+        run: |
+          status=$(az provider show --namespace Microsoft.Compute --query "registrationState" --output tsv)
+          echo "Current status of Microsoft.Compute provider: $status"
+          if [ "$status" != "Registered" ]; then
+            az provider register --namespace Microsoft.Compute
+            echo "Registration initiated..."
+          else
+            echo "Microsoft.Compute provider is already registered."
+          fi
+
+      - name: Check vCPU quota in France Central
+        run: |
+          az vm list-usage --location francecentral --query "[].{Type:localName, Total:limit, Used:currentValue}" --output table
+
+      - name: Logout of Azure
+        run: az logout
+
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Set up Azure CLI
-      uses: azure/setup-azure-cli@v1
+      - name: Set up Azure CLI
+        uses: azure/setup-azure-cli@v1
 
-    - name: Run deployment script
-      run: bash ./infra/create_aks.sh
+      - name: Run deployment script
+        run: bash ./infra/create_aks.sh
 
-    - name: Logout of Azure
-      run: az logout
+      - name: Logout of Azure
+        run: az logout

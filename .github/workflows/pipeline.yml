@@ -55,7 +55,7 @@ jobs:
         run: ls -la
 
       - name: Run deployment script
-        run: bash ./create_aks.sh
+        run: bash ./create-aks.sh
 
       - name: Logout of Azure
         run: az logout

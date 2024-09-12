@@ -48,7 +48,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Run deployment script
-        run: bash ./infra/create_aks.sh
+        run: bash create_aks.sh
 
       - name: Logout of Azure
         run: az logout

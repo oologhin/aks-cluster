@@ -38,6 +38,7 @@ jobs:
         run: az logout
 
   build:
+    needs: setup-azure
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -46,6 +47,9 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Make script executable
+        run: chmod +x ./create-aks.sh
 
       - name: List files in the current directory
         run: ls -la

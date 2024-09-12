@@ -59,3 +59,51 @@ jobs:
 
       - name: Logout of Azure
         run: az logout
+    
+  setup-aks-credentials:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials --resource-group aks-github-grp --name aks-scripted-cluster --overwrite-existing
+          kubectl config view
+
+  deploy-nginx:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Create Nginx deployment
+        run: |
+          kubectl create deployment nginx --image=nginx
+
+      - name: Expose the Nginx deployment as a LoadBalancer
+        run: |
+          kubectl expose deployment nginx --port=80 --type=LoadBalancer
+
+      - name: Check the status of the service
+        run: |
+          kubectl get services
+
+      - name: Scale Nginx deployment to 3 replicas
+        run: |
+          kubectl scale deployment nginx --replicas=3
+
+      - name: Update Nginx image
+        run: |
+          kubectl set image deployment/nginx nginx=nginx:1.19.0
+
+      - name: Logout of Azure
+        run: az logout

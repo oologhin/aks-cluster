@@ -92,6 +92,10 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials --resource-group aks-github-grp --name aks-scripted-cluster --overwrite-existing
+          kubectl config view
 
       - name: Create Nginx deployment
         run: |

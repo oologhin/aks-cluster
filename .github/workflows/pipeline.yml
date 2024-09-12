@@ -1,0 +1,28 @@
+---
+name: Deploy AKS Cluster
+
+on:
+  push:
+    branches:
+      - main  # Set this to the branch you use for deployment
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Azure CLI
+      uses: azure/setup-azure-cli@v1
+
+    - name: Run deployment script
+      run: bash ./infra/create_aks.sh
+
+    - name: Logout of Azure
+      run: az logout

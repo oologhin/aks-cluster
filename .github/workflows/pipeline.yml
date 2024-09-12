@@ -47,8 +47,11 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: List files in the current directory
+        run: ls -la
+
       - name: Run deployment script
-        run: bash create_aks.sh
+        run: bash ./create_aks.sh
 
       - name: Logout of Azure
         run: az logout
